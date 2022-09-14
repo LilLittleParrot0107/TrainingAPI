@@ -41,3 +41,25 @@ class MongoDB:
     #     return None
 
     # TODO: write functions CRUD with books
+    def add_book(self, book: Book):
+        try:
+            doc = self._books_col.insert_one(book.to_dict())
+            return doc
+        except Exception as ex:
+            return None
+
+    def del_book(self, book: Book):
+        try:
+            del_doc = self._books_col.delete_one(book.to_dict())
+            print(del_doc.deleted_count, " books deleted")
+            return True
+        except Exception as ex:
+            return None
+
+    def update_book(self, book_id, update={}):
+        try:
+
+            updated_doc = self._books_col.update_one({"_id":book_id},{"$set":update})
+            return updated_doc
+        except Exception as ex:
+            return None

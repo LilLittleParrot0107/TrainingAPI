@@ -1,5 +1,5 @@
 import time
-
+from sanic_openapi.openapi2 import doc
 
 class Book:
     def __init__(self, _id=''):
@@ -46,3 +46,13 @@ create_book_json_schema = {
     },
     'required': ['title', 'authors', 'publisher']
 }
+class PostBook:
+    title = doc.String(description= "Title", required= True)
+    authors = doc.List(description= "Authors",required=True)
+    publisher = doc.String(description= "Publisher", required=True)
+    description = doc.String(description= "Description",required=False)
+
+class PostUpdateBook:
+    book_id  = doc.String(description="Book Id", required=True)
+    update = doc.JsonBody(description="Update Fields",required=True)
+
