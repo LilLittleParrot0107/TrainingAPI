@@ -46,6 +46,18 @@ create_book_json_schema = {
     },
     'required': ['title', 'authors', 'publisher']
 }
+
+update_book_json_schema = {
+    'type': 'object',
+    'properties': {
+        'title': {'type': 'string'},
+        'authors': {'type': 'array', 'items': {'type': 'string'}},
+        'publisher': {'type': 'string'},
+        'description': {'type': 'string'},
+    },
+    'required': [],
+    "additionalProperties" : False
+}
 class PostBook:
     title = doc.String(description= "Title", required= True)
     authors = doc.List(description= "Authors",required=True)
@@ -53,7 +65,13 @@ class PostBook:
     description = doc.String(description= "Description",required=False)
 
 class PostUpdateBook:
-    update = doc.JsonBody(description="Update Fields",required=True)
+    title = doc.String(description="Title", required=False)
+    authors = doc.List(description="Authors", required=False)
+    publisher = doc.String(description="Publisher", required=False)
+    description = doc.String(description="Description", required=False)
+
+
+
 
 class PostLogin:
     username = doc.String(description='username',required=True)

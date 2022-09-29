@@ -69,14 +69,14 @@ class MongoDB:
             logger.exception(ex)
             return None
 
-    def get_user(self, filter_):
+    def get_user(self, filter_: object) -> object:
         try:
             if not filter_:
                 filter_ = {}
             cursor = self._users_col.find(filter_)
             data = []
             for doc in cursor:
-                data.append(Book().from_dict(doc))
+                data.append(doc)
             return data
         except Exception as ex:
             logger.exception(ex)
