@@ -53,6 +53,8 @@ class PostBook:
     description = doc.String(description= "Description",required=False)
 
 class PostUpdateBook:
-    book_id  = doc.String(description="Book Id", required=True)
     update = doc.JsonBody(description="Update Fields",required=True)
 
+class PostLogin:
+    username = doc.String(description='username',required=True)
+    password = doc.String(description='password',required=True)

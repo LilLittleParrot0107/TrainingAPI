@@ -14,7 +14,8 @@ class BooksTests(unittest.TestCase):
         self.assertIsInstance(data.get('books'), list)
 
     # TODO: unittest for another apis
-
+    def test_add_book(self):
+        request, response = app.test_client.get(/)
 
 if __name__ == '__main__':
     unittest.main()

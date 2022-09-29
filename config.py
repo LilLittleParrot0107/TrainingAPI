@@ -7,7 +7,7 @@ load_dotenv()
 
 class Config:
     RUN_SETTING = {
-        'host': os.environ.get('SERVER_HOST', 'localhost'),
+        'host': os.environ.get('SERVER_HOST', 'localhost'), #192.168.1.212
         'port': int(os.environ.get('SERVER_PORT', 8080)),
         'debug': False,
         "access_log": True,
