@@ -10,7 +10,7 @@ from app.databases.mongodb import MongoDB
 from app.databases.redis_cached import get_cache, set_cache
 from app.decorators.json_validator import validate_with_jsonschema
 from app.hooks.error import ApiInternalError, ApiNotFound, ApiForbidden, ApiBadRequest
-from app.models.book import create_book_json_schema, Book, PostBook, PostUpdateBook, PostLogin, update_book_json_schema
+from app.models.book import create_book_json_schema, Book, PostBook, PostUpdateBook, PostLogin,update_book_json_schema,login_json_schema
 
 books_bp = Blueprint('books_blueprint', url_prefix='/books')
 
@@ -33,6 +33,7 @@ async def get_all_books(request):
     number_of_books = len(books)
     return json({
         'n_books': number_of_books,
+
         'books': books
     })
 
@@ -54,10 +55,15 @@ async def create_book(request, username=None):
         raise ApiInternalError('Fail to create book')
 
     # TODO: Update cache
-    # async with request.app.ctx.redis as r:
-    #     books = await get_cache(r, CacheConstants.all_books)
-    #     books.append(book.to_dict())
-    #     await set_cache(r, CacheConstants.all_books, books)
+    async with request.app.ctx.redis as r:
+        books = await get_cache(r, CacheConstants.all_books)
+        if books is None:
+            book_objs = _db.get_books()
+            books = [book.to_dict() for book in book_objs]
+            await set_cache(r, CacheConstants.all_books, books)
+        books.append(book.to_dict())
+        await set_cache(r, CacheConstants.all_books, books)
+
     return json({'status': 'success'}, status=201)
 
 
@@ -75,7 +81,7 @@ async def read_book(request, book_id):
 
 
 @books_bp.route('<book_id>/', methods={'PUT'})
-@protected  # TODO: Authenticate
+@protected
 @doc.consumes(PostUpdateBook, location='body', required=True)
 @doc.consumes(doc.String(name="book_id", description="book_id"), location="path", required=True)
 @validate_with_jsonschema(update_book_json_schema)
@@ -95,17 +101,17 @@ async def update_book(request, book_id, username=None):
     if not updated:
         raise ApiInternalError('Fail to update book')
 
-    # async with request.app.ctx.redis as r:
-    #     books = await get_cache(r, CacheConstants.all_books)
-    #     books.remove(book)
-    #     books.append(updated)
-    #     await set_cache(r, CacheConstants.all_books, books)
+    async with request.app.ctx.redis as r:
+        books = await get_cache(r, CacheConstants.all_books)
+        books.remove(book)
+        books.append(updated)
+        await set_cache(r, CacheConstants.all_books, books)
     return json({'status': 'success'})
 
 
 @books_bp.route('<book_id>/', methods={'Delete'})
 @doc.consumes(doc.String(name="book_id", description="book_id"), location="path", required=True)
-@protected  # TODO: Authenticate
+@protected
 async def del_book(request, book_id, username=None):
     book = _db.get_books(filter_={"_id": book_id})
     if not book:
@@ -127,6 +133,7 @@ async def del_book(request, book_id, username=None):
 
 @books_bp.route('/register', methods={'POST'})
 @doc.consumes(PostLogin, location='body', required=True)
+@validate_with_jsonschema(login_json_schema)
 async def register(request):
     body = request.json
     username = body['username']
@@ -141,6 +148,7 @@ async def register(request):
 
 @books_bp.route('/login', methods={'POST'})
 @doc.consumes(PostLogin, location='body', required=True)
+@validate_with_jsonschema(login_json_schema)
 async def login(request):
     body = request.json
     username = body['username']

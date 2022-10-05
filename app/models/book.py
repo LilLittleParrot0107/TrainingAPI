@@ -74,5 +74,16 @@ class PostUpdateBook:
 
 
 class PostLogin:
-    username = doc.String(description='username',required=True)
-    password = doc.String(description='password',required=True)
+    username = doc.String(description='username', required=True)
+    password = doc.String(description='password', required=True)
+
+login_json_schema = {
+    'type': 'object',
+    'properties': {
+        'username': {'type': 'string'},
+        'password': {'type': 'string'},
+
+    },
+    'required': ['username', 'password'],
+    "additionalProperties" : False
+}
